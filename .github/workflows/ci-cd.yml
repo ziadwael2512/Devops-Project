@@ -22,19 +22,21 @@ jobs:
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5   
+          --health-retries 5
+
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4.2
-    
-      - name: setup node
+
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version:18
-      - name: install deps
+          node-version: 18
+
+      - name: Install dependencies
         run: |
           cd backend
           npm install
 
       - name: Run test
-        run: echo "test passed"  
+        run: echo "Test passed!"
