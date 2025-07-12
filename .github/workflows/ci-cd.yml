@@ -30,8 +30,8 @@ jobs:
         node-version:18
     - name: install deps
       run: |
-      cd backend
-      npm install
+        cd backend
+        npm install
 
     - name: Run test
       run: echo "test passed"  
