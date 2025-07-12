@@ -1,20 +1,26 @@
 services:
-  backend:
-    build: .
-    ports:
-      - "5000:50000"
-    env_file:
-      - backend/.env
-    depends_on:
-      - db
   db:
     image: postgres:14
-    restart: always
     environment:
+      POSTGRES_DB: signupdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: signubdb
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: signupdb
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
 volumes:
   pgdata:
