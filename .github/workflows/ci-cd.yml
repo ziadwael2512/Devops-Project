@@ -1,8 +1,9 @@
-name: CI/CD Pipline
+name: CI/CD Pipeline
 
 on:
   push:
-
+    branches:
+      - main
 
 jobs:
   build:
@@ -14,7 +15,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: signubdb
+          POSTGRES_DB: signupdb
         ports:
           - 5432:5432
         options: >-
@@ -22,16 +23,18 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5   
-  steps:
-    - name: check codr
-    - uses: actions/checkout@v4.2
-    - uses: actions/setup-node@v3
-      with:
-        node-version:18
-    - name: install deps
-      run: |
-        cd backend
-        npm install
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4.2
+    
+      - name: setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version:18
+      - name: install deps
+        run: |
+          cd backend
+          npm install
 
-    - name: Run test
-      run: echo "test passed"  
+      - name: Run test
+        run: echo "test passed"  
