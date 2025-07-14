@@ -54,18 +54,22 @@ jobs:
           curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
           unzip sonar-scanner.zip
           export PATH="$PWD/sonar-scanner-5.0.1.3006-linux/bin:$PATH"
-          sonar-scanner \
-            -Dsonar.projectKey=my-project \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=sqp_2daee56812eb85f9c6c43ae5c72d184beefb68bc \
+          ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner \
+            -Dsonar.projectKey=ziadwael2512_Devops-Project \
+            -Dsonar.organization=ziadwael2512 \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=sqp_0284e73f2998ffd326f7d2e927826c34863baf38 \
+            -Dsonar.sources=.
+
       - name: Export to json
         run: |
-          curl -s -u sqp_2daee56812eb85f9c6c43ae5c72d184beefb68bc: \
-            "http://localhost:9000/api/issues/search?componentsKeys=my-project" > sonar-issues.json
+          curl -s -u sqp_0284e73f2998ffd326f7d2e927826c34863baf38: \
+            "https://sonarcloud.io/api/issues/search?componentKeys=your_project_key" \
+            -o sonar-issues.json
+
       
       - name: Upload sonar artifact
         uses: actions/upload-artifact@v4
         with:
           name: sonar-report
-          path: sonar-report
+          path: sonar-issues.json
