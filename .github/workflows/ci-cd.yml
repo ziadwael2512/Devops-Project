@@ -49,6 +49,14 @@ jobs:
         with: 
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
+
+      - name: Disable SonarCloud Automatic Analysis
+        run: |
+          curl -X POST "https://sonarcloud.io/api/alm_integration/disable_automatic_analysis" \
+            -u c2f797f9f4120ceb5714c8cf24e6bf472205d3da: \
+            -d "project=ziadwael2512_Devops-Project"
+
+
       - name: Run sonar
         run: |
           curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
@@ -58,12 +66,12 @@ jobs:
             -Dsonar.projectKey=ziadwael2512_Devops-Project \
             -Dsonar.organization=ziadwael2512 \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=bfa3ed1e939df8077a015ed965dec9e3da18badf \
+            -Dsonar.login=c2f797f9f4120ceb5714c8cf24e6bf472205d3da \
             -Dsonar.sources=.
 
       - name: Export to json
         run: |
-          curl -s -u bfa3ed1e939df8077a015ed965dec9e3da18badf: \
+          curl -s -u c2f797f9f4120ceb5714c8cf24e6bf472205d3da: \
             "https://sonarcloud.io/api/issues/search?componentKeys=ziadwael2512_Devops-Project" \
             -o sonar-issues.json
 
