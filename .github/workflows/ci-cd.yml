@@ -58,13 +58,13 @@ jobs:
             -Dsonar.projectKey=ziadwael2512_Devops-Project \
             -Dsonar.organization=ziadwael2512 \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=sqp_0284e73f2998ffd326f7d2e927826c34863baf38 \
+            -Dsonar.login=bfa3ed1e939df8077a015ed965dec9e3da18badf \
             -Dsonar.sources=.
 
       - name: Export to json
         run: |
-          curl -s -u sqp_0284e73f2998ffd326f7d2e927826c34863baf38: \
-            "https://sonarcloud.io/api/issues/search?componentKeys=your_project_key" \
+          curl -s -u bfa3ed1e939df8077a015ed965dec9e3da18badf: \
+            "https://sonarcloud.io/api/issues/search?componentKeys=ziadwael2512_Devops-Project" \
             -o sonar-issues.json
 
       
