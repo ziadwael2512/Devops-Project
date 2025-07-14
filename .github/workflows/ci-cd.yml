@@ -37,6 +37,35 @@ jobs:
         run: |
           cd backend
           npm install
-
-      - name: Run test
-        run: echo "Test passed!"
+      - name: setup java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      
+      - name: Cache sonar package
+        uses: actions/cache@v3
+        with: 
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+      - name: Run sonar
+        run: |
+          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip sonar-scanner.zip
+          export PATH="$PWD/sonar-scanner-5.0.1.3006-linux/bin:$PATH"
+          sonar-scanner \
+            -Dsonar.projectKey=my-project \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.login=sqp_2daee56812eb85f9c6c43ae5c72d184beefb68bc \
+      - name: Export to json
+        run: |
+          curl -s -u sqp_2daee56812eb85f9c6c43ae5c72d184beefb68bc: \
+            "http://localhost:9000/api/issues/search?componentsKeys=my-project" > sonar-issues.json
+      
+      - name: Upload sonar artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sonar-report
+          path: sonar-report
