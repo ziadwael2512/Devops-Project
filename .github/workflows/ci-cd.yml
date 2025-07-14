@@ -65,7 +65,7 @@ jobs:
             "http://localhost:9000/api/issues/search?componentsKeys=my-project" > sonar-issues.json
       
       - name: Upload sonar artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sonar-report
           path: sonar-report
