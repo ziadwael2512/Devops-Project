@@ -37,44 +37,26 @@ jobs:
         run: |
           cd backend
           npm install
-      - name: setup java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
       
-      
-      - name: Cache sonar package
-        uses: actions/cache@v3
-        with: 
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-
-
-      - name: Run sonar
+      - name: install trivy
         run: |
-          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-          unzip sonar-scanner.zip
-          export PATH="$PWD/sonar-scanner-5.0.1.3006-linux/bin:$PATH"
-          ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner \
-            -Dsonar.projectKey=ziadwael2512_Devops-Project \
-            -Dsonar.organization=ziadwael2512 \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=b9fff450f87e295ccf595d9893a0fcbe0b540c6d \
-            -Dsonar.sources=.
-
-      - name: Export to json
-        run: |
-          curl -s -u b9fff450f87e295ccf595d9893a0fcbe0b540c6d: \
-            "https://sonarcloud.io/api/issues/search?componentKeys=ziadwael2512_Devops-Project" \
-            -o sonar-issues.json
-
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.2_Linux-64bit.deb
+          sudo dpkg -i trivy_0.50.2_Linux-64bit.deb
       
-      - name: Upload sonar artifact
+      - name: run trivy
+        run: |
+          mkdir -p results
+          trivy fs . --format json --output results/result.json
+      
+      
+      
+      - name: Upload trivy artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sonar-report
-          path: sonar-issues.json
+          name: trivy-report
+          path: results/result.json
   
   push-artifact-to-branch:
     needs: build
@@ -89,7 +71,7 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: logs
+          name: trivy-report
           path: security-report-result
       
 
@@ -102,8 +84,9 @@ jobs:
       - name: Prepare log branch
         run: |
           git fetch origin 
-          git switch logs
-          cp sonar-issues.json sonar-scan-$(date +'%Y-%m-%d-%H%M%S').json
-          git add .
+          git switch logs || git switch --create logs
+          mkdir -p reports
+          cp security-report-result/result.json reports/trivy-scan-${{ github.run_id }}-$(date +'%Y-%m-%d-%H%M%S').json
+          git add reports/
           git commit -m "Add report from $(date)"
           git push origin logs
