@@ -9,60 +9,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: signupdb
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: |
-          cd backend
-          npm install
-      
-      - name: install trivy
+      - name: Install Trivy
         run: |
           sudo apt-get update
           sudo apt-get install -y curl
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
-      
-      - name: run trivy
-        run: |
-          mkdir -p results
-          trivy fs . --format json --output results/result.json
-      
-      
-      
-      - name: Upload trivy artifact
+
+      - name: Run Trivy scan (filesystem + secrets + config, HIGH & CRITICAL only)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'results/result.json'
+          severity: 'HIGH,CRITICAL'
+          scanners: 'vuln,secret,config'
+          
+      - name: Upload Trivy artifact
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report
           path: results/result.json
-  
+
   push-artifact-to-branch:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout
+      - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -73,20 +48,18 @@ jobs:
         with:
           name: trivy-report
           path: security-report-result
-      
 
-    
-      - name: configure git
+      - name: Configure Git
         run: |
-          git config --global user.name "Action"
-          git config --global user.email "action@mail.com"
-      
-      - name: Prepare log branch
+          git config --global user.name "Action Bot"
+          git config --global user.email "action@example.com"
+
+      - name: Push report to logs branch
         run: |
-          git fetch origin 
+          git fetch origin
           git switch logs || git switch --create logs
           mkdir -p reports
-          cp security-report-result/result.json reports/trivy-scan-${{ github.run_id }}-$(date +'%Y-%m-%d-%H%M%S').json
+          cp security-report-result/result.json reports/trivy-scan-$(date +'%Y-%m-%d-%H-%M-%S').json
           git add reports/
-          git commit -m "Add report from $(date)"
+          git commit -m "Add Trivy report from $(date)"
           git push origin logs
