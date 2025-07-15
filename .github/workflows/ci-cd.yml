@@ -88,4 +88,5 @@ jobs:
           cp security-report-result/result.json reports/trivy-scan-${{ github.run_id }}-$(date +'%Y-%m-%d-%H%M%S').json
           git add reports/
           git commit -m "Add report from $(date)"
+          git remote set-url origin https://ziadwael2512:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/ziadwael2512/Devops-Project.git
           git push origin logs
