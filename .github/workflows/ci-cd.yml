@@ -75,3 +75,35 @@ jobs:
         with:
           name: sonar-report
           path: sonar-issues.json
+  
+  push-artifact-to-branch:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: logs
+          path: security-report-result
+      
+
+    
+      - name: configure git
+        run: |
+          git config --global user.name "Action"
+          git config --global user.email "action@mail.com"
+      
+      - name: Prepare log branch
+        run: |
+          git fetch origin 
+          git switch logs
+          cp sonar-issues.json sonar-scan-$(date +'%Y-%m-%d-%H%M%S').json
+          git add .
+          git commit -m "Add report from $(date)"
+          git push origin logs
