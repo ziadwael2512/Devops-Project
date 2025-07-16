@@ -23,7 +23,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report
-          path: results/result.json
+          path: result.json
 
   push-artifact-to-branch:
     needs: Trivy_scan
