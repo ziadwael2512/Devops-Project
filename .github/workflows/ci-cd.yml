@@ -22,7 +22,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'image'
-          image-ref: 'devops-project-backend :latest'
+          image-ref: 'devops-project-backend:latest'
           format: 'json'
           output: 'trivy-backend-image.json'
           severity: 'HIGH,CRITICAL'
