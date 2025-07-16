@@ -15,7 +15,7 @@ jobs:
           scan-type: 'fs'
           scan-ref: '.'
           format: 'json'
-          output: 'results/result.json'
+          output: 'result.json'
           severity: 'HIGH,CRITICAL'
           scanners: 'vuln,secret,config'
 
