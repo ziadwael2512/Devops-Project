@@ -9,22 +9,41 @@ jobs:
   Trivy_scan:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup docker
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build docker
+        run: docker compose build
+        
+      - name: Trivy scan backend service image
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: 'backend:latest'
+          format: 'json'
+          output: 'trivy-backend-image.json'
+          severity: 'HIGH,CRITICAL'
+
       - name: Run Trivy scan (filesystem + secrets + config, HIGH & CRITICAL only)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
           format: 'json'
-          output: 'result.json'
+          output: 'trivy-fs-scan.json'
           severity: 'HIGH,CRITICAL'
           scanners: 'vuln,secret,config'
 
       - name: Upload Trivy artifact
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-report
-          path: result.json
-
+          name: trivy-reports
+          path: |
+            trivy-backend-image.json
+            trivy-fs-scan.json
   push-artifact-to-branch:
     needs: Trivy_scan
     runs-on: ubuntu-latest
@@ -39,8 +58,8 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: trivy-report
-          path: security-report-result
+          name: trivy-reports
+          path: security-report-results
 
       - name: Configure Git
         run: |
@@ -52,7 +71,8 @@ jobs:
           git fetch origin
           git switch logs || git switch --create logs
           mkdir -p reports
-          cp security-report-result/result.json reports/trivy-scan-$(date +'%Y-%m-%d-%H-%M-%S').json
+          cp security-report-results/trivy-backend-image.json reports/trivy-image-scan-$(date +'%Y-%m-%d-%H-%M-%S').json
+          cp security-report-results/trivy-fs-scan.json reports/trivy-scan-$(date +'%Y-%m-%d-%H-%M-%S').json
           git add reports/
           git commit -m "Add Trivy report from $(date)"
           git push origin logs
